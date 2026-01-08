@@ -11,22 +11,6 @@ This repository showcases practical implementations of Generative AI across vari
 ### Legal & Compliance
 - **[Intelligent Contract Management](./Intelligent-Contract-Management-with-QuickSuite-and-AgentCore/)** - AI-powered legal contract analysis and risk assessment system using Amazon Bedrock AgentCore
 
-## 🛠️ Technology Stack
-
-**Core AWS Services:**
-- Amazon Bedrock (Claude 3, Titan models)
-- Amazon Bedrock AgentCore Runtime
-- AWS Lambda
-- Amazon API Gateway
-- Amazon Cognito
-- AWS IAM
-
-**Development & Deployment:**
-- Python 3.9+
-- Docker containerization
-- Infrastructure as Code (CDK/CloudFormation)
-- CI/CD pipelines
-
 ## 🚀 Getting Started
 
 Each solution includes:
@@ -36,13 +20,6 @@ Each solution includes:
 - Testing instructions
 
 Navigate to individual solution directories for specific setup instructions.
-
-## 📋 Prerequisites
-
-- AWS Account with appropriate permissions
-- AWS CLI configured
-- Python 3.9 or later
-- Docker (for containerized deployments)
 
 ## 🏗️ Architecture Principles
 
