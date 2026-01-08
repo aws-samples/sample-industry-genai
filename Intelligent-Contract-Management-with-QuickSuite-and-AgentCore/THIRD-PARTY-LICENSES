@@ -1,0 +1,195 @@
+# Third-Party Licenses
+
+This document lists the open source software libraries used in the AWS GenAI Industry Examples project and their respective licenses.
+
+## Core AI/ML Dependencies
+
+### Bedrock AgentCore
+- **License**: Proprietary (AWS Service)
+- **Repository**: AWS Bedrock Service
+- **Description**: AWS service for building and deploying AI agents using foundation models
+
+### Strands Agents
+- **License**: Proprietary (AWS Service)
+- **Repository**: AWS Bedrock Service
+- **Description**: Framework for building multi-agent AI systems on AWS
+
+### Strands Agents Tools
+- **License**: Proprietary (AWS Service)
+- **Repository**: AWS Bedrock Service
+- **Description**: Additional tools and utilities for Strands agent development
+
+### Boto3
+- **License**: Apache License 2.0
+- **Repository**: https://github.com/boto/boto3
+- **Description**: AWS SDK for Python, providing access to AWS services
+
+## Web Application Framework
+
+### Streamlit
+- **License**: Apache License 2.0
+- **Repository**: https://github.com/streamlit/streamlit
+- **Description**: Open-source app framework for Machine Learning and Data Science projects
+
+## Document Processing Libraries
+
+### PyPDF2
+- **License**: BSD 3-Clause License
+- **Repository**: https://github.com/py-pdf/PyPDF2
+- **Description**: Pure-python PDF library capable of extracting document information
+
+### pdfplumber
+- **License**: MIT License
+- **Repository**: https://github.com/jsvine/pdfplumber
+- **Description**: Plumb a PDF for detailed information about each text character, rectangle, and line
+
+### python-docx
+- **License**: MIT License
+- **Repository**: https://github.com/python-openxml/python-docx
+- **Description**: Create and update Microsoft Word (.docx) files
+
+### openpyxl
+- **License**: MIT License
+- **Repository**: https://github.com/openpyxl/openpyxl
+- **Description**: Python library to read/write Excel 2010 xlsx/xlsm/xltx/xltm files
+
+### ReportLab
+- **License**: BSD 3-Clause License
+- **Repository**: https://github.com/MrBitBucket/reportlab-mirror
+- **Description**: Open-source Python library for generating PDFs and graphics
+
+## Data Processing and Utilities
+
+### pandas
+- **License**: BSD 3-Clause License
+- **Repository**: https://github.com/pandas-dev/pandas
+- **Description**: Powerful data structures for data analysis, time series, and statistics
+
+### chardet
+- **License**: GNU Lesser General Public License v2.1
+- **Repository**: https://github.com/chardet/chardet
+- **Description**: Universal encoding detector for Python
+
+### python-dotenv
+- **License**: BSD 3-Clause License
+- **Repository**: https://github.com/theskumar/python-dotenv
+- **Description**: Read key-value pairs from a .env file and set them as environment variables
+
+## Python Standard Library Extensions
+
+### pathlib
+- **License**: Python Software Foundation License
+- **Repository**: Part of Python Standard Library
+- **Description**: Object-oriented filesystem paths
+
+### asyncio
+- **License**: Python Software Foundation License
+- **Repository**: Part of Python Standard Library
+- **Description**: Asynchronous I/O, event loop, coroutines and tasks
+
+### json
+- **License**: Python Software Foundation License
+- **Repository**: Part of Python Standard Library
+- **Description**: JSON encoder and decoder
+
+### os
+- **License**: Python Software Foundation License
+- **Repository**: Part of Python Standard Library
+- **Description**: Operating system interface
+
+### re
+- **License**: Python Software Foundation License
+- **Repository**: Part of Python Standard Library
+- **Description**: Regular expression operations
+
+### typing
+- **License**: Python Software Foundation License
+- **Repository**: Part of Python Standard Library
+- **Description**: Support for type hints
+
+### dataclasses
+- **License**: Python Software Foundation License
+- **Repository**: Part of Python Standard Library
+- **Description**: Classes for storing data
+
+### enum
+- **License**: Python Software Foundation License
+- **Repository**: Part of Python Standard Library
+- **Description**: Support for enumerations
+
+### datetime
+- **License**: Python Software Foundation License
+- **Repository**: Part of Python Standard Library
+- **Description**: Basic date and time types
+
+### subprocess
+- **License**: Python Software Foundation License
+- **Repository**: Part of Python Standard Library
+- **Description**: Subprocess management
+
+### shlex
+- **License**: Python Software Foundation License
+- **Repository**: Part of Python Standard Library
+- **Description**: Simple lexical analysis
+
+## Development and Testing Dependencies
+
+### pytest (Optional)
+- **License**: MIT License
+- **Repository**: https://github.com/pytest-dev/pytest
+- **Description**: Framework for writing small tests, yet scales to support complex functional testing
+
+## AWS Services (Not Open Source)
+
+The following AWS services are used in this project but are proprietary cloud services:
+
+- **Amazon Bedrock**: Foundation model service
+- **AWS Lambda**: Serverless compute service
+- **Amazon S3**: Object storage service
+- **AWS IAM**: Identity and Access Management
+- **Amazon CloudWatch**: Monitoring and observability
+- **AWS API Gateway**: API management service
+
+## License Types Summary
+
+### Open Source Licenses:
+- **Apache License 2.0**: Boto3, Streamlit
+- **MIT License**: pdfplumber, python-docx, openpyxl, pytest
+- **BSD 3-Clause License**: PyPDF2, ReportLab, pandas, python-dotenv
+- **GNU Lesser General Public License v2.1**: chardet
+- **Python Software Foundation License**: Python Standard Library modules
+
+### Proprietary Licenses:
+- **AWS Services**: Bedrock AgentCore, Strands Agents, Strands Agents Tools, and other AWS services
+
+## Security and Compliance
+
+All third-party libraries have been reviewed for:
+- Known security vulnerabilities
+- License compatibility
+- Maintenance status and community support
+- Compliance with enterprise security requirements
+
+## Notice
+
+This project demonstrates enterprise-grade AI applications using AWS services. All open-source libraries are used in accordance with their respective licenses. AWS services are used under the AWS Customer Agreement and service-specific terms.
+
+For complete license texts of open-source components, please refer to the individual repositories listed above.
+
+For AWS service terms and conditions, please refer to:
+- AWS Customer Agreement: https://aws.amazon.com/agreement/
+- AWS Service Terms: https://aws.amazon.com/service-terms/
+
+## Dependency Management
+
+Dependencies are managed through:
+- **requirements.txt**: Python package dependencies
+- **Makefile**: Build and deployment automation
+- **Security scanning**: Regular vulnerability assessments
+- **Version pinning**: Controlled dependency updates
+
+## Attribution
+
+This project acknowledges the contributions of the open-source community and the developers of the libraries listed above. Their work enables the creation of sophisticated AI applications that benefit businesses across industries.
+
+---

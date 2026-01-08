@@ -1,0 +1,116 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Legal Contract Analysis API",
+    "version": "1.0.0",
+    "description": "API for analyzing legal contracts using AI agents"
+  },
+  "servers": [
+    {
+      "url": "https://7um8a8d783.execute-api.us-east-1.amazonaws.com/prod"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "oauth2": {
+        "type": "oauth2",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://legal-contract-qs.auth.us-east-1.amazoncognito.com/oauth2/token",
+            "scopes": {
+              "legal-contract-resource-server/read": "Read access to legal contract resources",
+              "legal-contract-resource-server/write": "Write access to legal contract resources"
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "oauth2": [
+        "legal-contract-resource-server/read",
+        "legal-contract-resource-server/write"
+      ]
+    }
+  ],
+  "paths": {
+    "/analyze": {
+      "post": {
+        "summary": "Analyze legal contract",
+        "description": "Submit a legal contract for AI-powered analysis including clause extraction, risk assessment, and compliance checking",
+        "security": [
+          {
+            "oauth2": [
+              "legal-contract-resource-server/read",
+              "legal-contract-resource-server/write"
+            ]
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "contract_text": {
+                    "type": "string",
+                    "description": "The full text of the legal contract to analyze"
+                  },
+                  "question": {
+                    "type": "string",
+                    "description": "Optional specific question about the contract"
+                  }
+                },
+                "required": ["contract_text"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful contract analysis",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "analysis": {
+                      "type": "object",
+                      "description": "Complete contract analysis results"
+                    },
+                    "clauses": {
+                      "type": "array",
+                      "description": "Extracted contract clauses"
+                    },
+                    "risks": {
+                      "type": "array",
+                      "description": "Identified risks and concerns"
+                    },
+                    "compliance": {
+                      "type": "object",
+                      "description": "Compliance assessment results"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input - missing or malformed request"
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing OAuth token"
+          },
+          "403": {
+            "description": "Forbidden - insufficient OAuth scopes"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  }
+}

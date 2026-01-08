@@ -1,0 +1,35 @@
+# Generated deployment files
+agents_deployment.json
+quicksuite_integration_config.json
+quicksuite_openapi_schema.json
+lambda_config.json
+api_config.json
+cognito_config.json
+
+# AgentCore files
+.bedrock_agentcore.yaml
+lambda_deployment.zip
+quicksuite_lambda.zip
+
+# Environment files
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

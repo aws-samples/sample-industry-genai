@@ -1,0 +1,20 @@
+bedrock-agentcore
+bedrock-agentcore-starter-toolkit
+strands-agents
+strands-agents-tools
+boto3
+botocore
+python-dotenv
+# Document processing libraries
+PyPDF2
+pdfplumber
+openpyxl
+pandas
+python-docx
+# Additional utilities
+chardet
+# Optional: for creating sample PDF files
+reportlab
+# Redshift connectivity
+psycopg2-binary
+redshift-connector
