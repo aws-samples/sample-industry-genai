@@ -1,7 +1,7 @@
-# Intelligent Contract Management with Amazon Quick Suite and AgentCore
+# Intelligent Contract Management with Amazon Quick and AgentCore
 
 A multi-agent legal contract analyzer built on Amazon Bedrock AgentCore, surfaced to end
-users through Amazon Quick Suite. Four specialized agents extract clauses, assess risk, check
+users through Amazon Quick. Four specialized agents extract clauses, assess risk, check
 regulatory compliance, and synthesize an executive report with an approve/review/reject
 recommendation.
 
@@ -19,8 +19,7 @@ Quick Suite  ──►  API Gateway  ──►  Lambda  ──┬──►  Lega
 ```
 
 The Lambda fans out to the three analysis agents concurrently, then passes their combined
-output to the response agent. Running the analysis agents in parallel rather than
-sequentially is what keeps the request inside API Gateway's 29-second ceiling.
+output to the response agent.
 
 | Agent | Role | Output |
 |---|---|---|
@@ -175,41 +174,6 @@ python3 -c "import json;d=json.load(open('/tmp/response.json'));b=json.loads(d['
 `agent_results` reports per-agent status and is the fastest way to confirm all four agents
 ran rather than the request degrading to a partial answer.
 
-## Performance and timeout constraints
-
-Measured warm, with the 19,000-character sample contract:
-
-| Stage | Elapsed |
-|---|---|
-| Clause, risk, compliance (parallel) | 7-11s |
-| Response agent synthesis | +9-11s |
-| **Total** | **19-22s** |
-
-This matters because of two hard limits that cannot be raised:
-
-| Path | Timeout | Notes |
-|---|---|---|
-| API Gateway REST API | **29s** | The integration timeout ceiling |
-| Quick Suite MCP connector | **60s** | Fixed; no streaming or partial updates |
-
-That leaves roughly 7-10 seconds of headroom on the API Gateway path. Two practical
-consequences:
-
-- **Warm up before demoing.** A cold container start will distort the first request and can
-  exceed the budget. Send one throwaway invocation first.
-- **Agent output is deliberately capped** to hold the budget. Latency here is bound by token
-  generation, not input size — doubling the contract length added only ~4s. Caps are
-  overridable per agent via `agentcore.json` `envVars` (redeploy required):
-
-| Variable | Default |
-|---|---|
-| `CLAUSE_AGENT_MAX_TOKENS` / `CLAUSE_AGENT_MAX_CLAUSES` | 1800 / 10 |
-| `RISK_AGENT_MAX_TOKENS` / `RISK_AGENT_MAX_RISKS` | 1500 / 5 |
-| `COMPLIANCE_AGENT_MAX_TOKENS` | 1500 |
-| `RESPONSE_AGENT_MAX_TOKENS` | 2000 |
-
-Raising them improves depth at the cost of latency.
-
 ## Teardown
 
 ```bash
@@ -224,27 +188,14 @@ stack (`CDKToolkit`) and its staging bucket, ECR images, and CloudWatch log grou
 
 ## Troubleshooting
 
-**`This runtime is not MMDSv2-enabled and can no longer be invoked`**
-As of June 30, 2026 AgentCore requires MMDSv2 on all runtimes. Runtimes created before then
-have `requireMMDSV2: false`. Redeploying with `agentcore deploy` produces compliant runtimes.
-To patch an existing runtime in place:
-
-```bash
-aws bedrock-agentcore-control update-agent-runtime \
-  --agent-runtime-id <id> --metadata-configuration requireMMDSV2=true \
-  --agent-runtime-artifact <current> --role-arn <current> \
-  --network-configuration <current> --region us-east-1
-```
-
-**`Invocation of model ID ... with on-demand throughput isn't supported`**
-Use an inference profile ID (`us.` or `global.` prefix). See [Model access](#model-access).
-
 **`Access denied. This Model is marked by provider as Legacy`**
 The configured model is `LEGACY` and unused for 30+ days. Switch to an `ACTIVE` profile.
 
-**504 Gateway Timeout from Quick Suite**
-The analysis exceeded API Gateway's 29s limit, usually a cold start. Warm the agents, or
-lower the `*_MAX_TOKENS` caps.
+**504 Gateway Timeout**
+The analysis exceeded the API Gateway integration timeout, most often because of a cold
+container start. Send one throwaway request to warm the agents. If it persists, reduce the
+per-agent output caps (`*_MAX_TOKENS`, `RISK_AGENT_MAX_RISKS`, `CLAUSE_AGENT_MAX_CLAUSES`)
+in the agents' `envVars` in `agentcore/agentcore.json` and redeploy.
 
 **Agent returns a generic template instead of analyzing the contract**
 The response agent received no `contract_text` and no upstream analyses. Check that the
