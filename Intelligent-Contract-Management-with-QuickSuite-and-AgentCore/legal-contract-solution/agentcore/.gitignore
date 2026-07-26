@@ -1,0 +1,17 @@
+# Secrets (local environment files are never committed)
+.env.local
+
+# CDK Build Artifacts
+cdk/cdk.out/
+cdk/node_modules/
+
+# CLI Internals
+#
+# Includes .cli/deployed-state.json, which holds deployment-specific agent ARNs,
+# IAM role names, and the AWS account id. The AgentCore scaffold commits that file
+# by default so a team can share one deployment, but this is a public sample repo:
+# every consumer runs `agentcore deploy` and generates their own state.
+.cli/
+
+# Ephemeral Staging
+.cache/*

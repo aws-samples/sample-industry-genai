@@ -1,303 +1,303 @@
 #!/usr/bin/env python3
+"""Tear down the deployed legal contract analyzer.
+
+Removes, in dependency order:
+
+  1. Quick Suite integration layer  - API Gateway, Lambda, Cognito user pool, IAM role
+                                      (read from quicksuite_integration_config.json)
+  2. AgentCore agents               - by deleting the CDK CloudFormation stack
+                                      (read from agentcore/.cli/deployed-state.json)
+  3. Generated local files
+
+The AgentCore CLI has no `destroy` command; `agentcore remove` only edits local
+project config. Deleting the CloudFormation stack that `agentcore deploy` created
+is the supported teardown path.
+
+Run from the legal-contract-solution directory:
+
+    python deployment/cleanup.py           # prompts for confirmation
+    python deployment/cleanup.py --yes     # non-interactive
+
+NOT removed (may be shared with other projects, delete manually if desired):
+  • the CDK bootstrap stack (CDKToolkit) and its staging bucket
+  • ECR images built for the agents
+  • CloudWatch log groups
 """
-Comprehensive cleanup script to remove all deployed AWS resources
-Removes: AgentCore agents, CodeBuild projects, API Gateway, Lambda, Cognito, IAM roles
-"""
-import boto3
+
+import argparse
 import json
-import subprocess
-import time
 import os
+import sys
+import time
 
-def get_aws_account_info():
-    """Get current AWS account ID and region"""
-    try:
-        sts_client = boto3.client('sts')
-        identity = sts_client.get_caller_identity()
-        account_id = identity['Account']
-        
-        # Get current region from session
-        session = boto3.Session()
-        region = session.region_name or os.environ.get('AWS_DEFAULT_REGION', 'us-east-1')
-        
-        return account_id, region
-    except Exception as e:
-        print(f"❌ Failed to get AWS account info: {e}")
-        return None, None
+import boto3
+from botocore.exceptions import ClientError
 
-def load_deployment_config():
-    """Load deployment configuration"""
+QS_CONFIG_PATH = "quicksuite_integration_config.json"
+DEPLOYED_STATE_PATH = "agentcore/.cli/deployed-state.json"
+LAMBDA_ROLE_NAME = "QuickSuiteLegalContractLambdaRole"
+
+GENERATED_FILES = (
+    QS_CONFIG_PATH,
+    "quicksuite_openapi_schema.json",
+    "quicksuite_lambda.zip",
+    ".bedrock_agentcore.yaml",  # legacy artifact from the old starter toolkit
+)
+
+
+def get_region():
+    return boto3.Session().region_name or os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
+
+
+def load_json(path):
     try:
-        with open('quicksuite_integration_config.json', 'r') as f:
+        with open(path) as f:
             return json.load(f)
     except FileNotFoundError:
-        print("⚠️ No deployment config found")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"⚠️  {path} is not valid JSON: {e}")
         return None
 
-def load_agents_config():
-    """Load agents deployment configuration"""
-    try:
-        with open('deployment/outputs/agents_deployment.json', 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        print("⚠️ No agents config found")
+
+def get_stack_name(state, target="default"):
+    if not state:
         return None
+    return state.get("targets", {}).get(target, {}).get("resources", {}).get("stackName")
 
-def cleanup_agentcore_agents(agents_config):
-    """Remove AgentCore agents using agentcore CLI"""
-    if not agents_config or 'deployed_agents' not in agents_config:
-        print("⚠️ No agents config found")
-        return
-    
-    account_id, region = get_aws_account_info()
-    if not account_id or not region:
-        print("❌ Could not get AWS account info")
-        return
-    
-    for agent_name, agent_arn in agents_config['deployed_agents'].items():
-        try:
-            print(f"🗑️ Destroying agent: {agent_name}")
-            
-            # Extract agent ID from ARN
-            agent_id = agent_arn.split('/')[-1]
-            
-            # Create .bedrock_agentcore.yaml for this agent
-            config = f"""default_agent: {agent_name}
-agents:
-  {agent_name}:
-    name: {agent_name}
-    entrypoint: agents/{agent_name}.py
-    deployment_type: container
-    runtime_type: PYTHON_3_10
-    platform: linux/arm64
-    container_runtime: null
-    source_path: .
-    aws:
-      execution_role_auto_create: true
-      account: '{account_id}'
-      region: {region}
-      ecr_repository: {account_id}.dkr.ecr.{region}.amazonaws.com/legal-contract-agentcore
-      ecr_auto_create: false
-      s3_path: null
-      s3_auto_create: true
-      network_configuration:
-        network_mode: PUBLIC
-        network_mode_config: null
-      protocol_configuration:
-        server_protocol: HTTP
-      observability:
-        enabled: true
-      lifecycle_configuration:
-        idle_runtime_session_timeout: null
-        max_lifetime: null
-    bedrock_agentcore:
-      agent_id: {agent_id}
-      agent_arn: {agent_arn}
-      agent_session_id: null
-    codebuild:
-      project_name: bedrock-agentcore-{agent_name}-builder
-      source_bucket: bedrock-agentcore-codebuild-sources-{account_id}-{region}
-    memory:
-      mode: NO_MEMORY
-      memory_id: null
-      memory_arn: null
-      memory_name: null
-      event_expiry_days: 30
-      first_invoke_memory_check_done: false
-      was_created_by_toolkit: false
-    identity:
-      credential_providers: []
-      workload: null
-    aws_jwt:
-      enabled: false
-      audiences: []
-      signing_algorithm: ES384
-      issuer_url: null
-      duration_seconds: 300
-    authorizer_configuration: null
-    request_header_configuration: null
-    oauth_configuration: null
-    api_key_env_var_name: null
-    api_key_credential_provider_name: null
-    is_generated_by_agentcore_create: false
-"""
-            
-            with open('.bedrock_agentcore.yaml', 'w') as f:
-                f.write(config)
-            
-            # Use agentcore CLI to destroy agent (auto-confirm with echo)
-            result = subprocess.run(
-                f'echo "y" | agentcore destroy --agent {agent_name}',
-                shell=True, capture_output=True, text=True, timeout=180
-            )
-            
-            if result.returncode == 0:
-                print(f"✅ Destroyed agent: {agent_name}")
-            else:
-                print(f"❌ Failed to destroy agent {agent_name}: {result.stderr}")
-                
-        except Exception as e:
-            print(f"❌ Error destroying agent {agent_name}: {e}")
 
-def cleanup_api_gateway(config):
-    """Remove API Gateway"""
-    if not config or 'api_gateway_id' not in config:
-        print("⚠️ No API Gateway ID found")
+def confirm(stack_name, qs_config, assume_yes):
+    print("🧹 Teardown plan")
+    print("=" * 60)
+
+    if qs_config:
+        print("Quick Suite integration layer:")
+        print(f"  • API Gateway:   {qs_config.get('api_gateway_id', '(unknown)')}")
+        print(f"  • Lambda:        {qs_config.get('lambda_function_arn', '(unknown)')}")
+        cog = qs_config.get("cognito", {})
+        print(f"  • Cognito pool:  {cog.get('user_pool_id', '(unknown)')}")
+        print(f"  • IAM role:      {LAMBDA_ROLE_NAME}")
+    else:
+        print(f"Quick Suite integration layer: SKIPPED ({QS_CONFIG_PATH} not found)")
+
+    if stack_name:
+        print("\nAgentCore agents:")
+        print(f"  • CloudFormation stack: {stack_name}")
+        print("    (deletes all four agent runtimes and their execution roles)")
+    else:
+        print(f"\nAgentCore agents: SKIPPED ({DEPLOYED_STATE_PATH} not found)")
+
+    print("\nLocal files:", ", ".join(GENERATED_FILES))
+    print("=" * 60)
+
+    if not stack_name and not qs_config:
+        print("Nothing to do.")
+        return False
+
+    if assume_yes:
+        return True
+
+    print("\n⚠️  This permanently deletes the resources listed above.")
+    answer = input("Type 'delete' to proceed: ").strip()
+    if answer != "delete":
+        print("Aborted. Nothing was deleted.")
+        return False
+    return True
+
+
+def cleanup_api_gateway(qs_config, region):
+    api_id = (qs_config or {}).get("api_gateway_id")
+    if not api_id:
+        print("⚠️  No API Gateway id in config, skipping")
         return
-    
     try:
-        apigw_client = boto3.client('apigateway')
-        api_id = config['api_gateway_id']
-        
-        apigw_client.delete_rest_api(restApiId=api_id)
+        boto3.client("apigateway", region_name=region).delete_rest_api(restApiId=api_id)
         print(f"✅ Deleted API Gateway: {api_id}")
-    except Exception as e:
-        print(f"❌ Failed to delete API Gateway: {e}")
+    except ClientError as e:
+        if e.response["Error"]["Code"] == "NotFoundException":
+            print(f"ℹ️  API Gateway {api_id} already gone")
+        else:
+            print(f"❌ Failed to delete API Gateway: {e}")
 
-def cleanup_lambda_function(config):
-    """Remove Lambda function"""
-    if not config or 'lambda_function_arn' not in config:
-        print("⚠️ No Lambda function ARN found")
+
+def cleanup_lambda(qs_config, region):
+    arn = (qs_config or {}).get("lambda_function_arn")
+    if not arn:
+        print("⚠️  No Lambda ARN in config, skipping")
         return
-    
+    function_name = arn.split(":")[-1]
+    client = boto3.client("lambda", region_name=region)
+
+    # A function URL, if one was created, must go before the function itself.
     try:
-        lambda_client = boto3.client('lambda')
-        # Extract function name from ARN
-        function_arn = config['lambda_function_arn']
-        function_name = function_arn.split(':')[-1]
-        
-        lambda_client.delete_function(FunctionName=function_name)
+        client.delete_function_url_config(FunctionName=function_name)
+        print(f"✅ Deleted function URL for {function_name}")
+    except ClientError:
+        pass
+
+    try:
+        client.delete_function(FunctionName=function_name)
         print(f"✅ Deleted Lambda function: {function_name}")
-    except Exception as e:
-        print(f"❌ Failed to delete Lambda function: {e}")
+    except ClientError as e:
+        if e.response["Error"]["Code"] == "ResourceNotFoundException":
+            print(f"ℹ️  Lambda {function_name} already gone")
+        else:
+            print(f"❌ Failed to delete Lambda: {e}")
 
-def cleanup_cognito_user_pool(config):
-    """Remove Cognito User Pool and domain"""
-    if not config or 'cognito' not in config:
-        print("⚠️ No Cognito config found")
+
+def cleanup_cognito(qs_config, region):
+    cognito_config = (qs_config or {}).get("cognito")
+    if not cognito_config:
+        print("⚠️  No Cognito config, skipping")
         return
-    
-    try:
-        cognito_client = boto3.client('cognito-idp')
-        cognito_config = config['cognito']
-        user_pool_id = cognito_config['user_pool_id']
-        
-        # Extract domain name from domain URL
-        domain_url = cognito_config['domain_url']
-        domain_name = domain_url.split('//')[1].split('.')[0]
-        
-        # Delete domain first
-        try:
-            cognito_client.delete_user_pool_domain(
-                Domain=domain_name,
-                UserPoolId=user_pool_id
-            )
-            print(f"✅ Deleted Cognito domain: {domain_name}")
-            time.sleep(10)  # Wait for domain deletion
-        except Exception as e:
-            print(f"⚠️ Domain deletion: {e}")
-        
-        # Delete user pool
-        cognito_client.delete_user_pool(UserPoolId=user_pool_id)
-        print(f"✅ Deleted Cognito User Pool: {user_pool_id}")
-    except Exception as e:
-        print(f"❌ Failed to delete Cognito User Pool: {e}")
-        print(f"❌ Failed to delete Cognito User Pool: {e}")
 
-def cleanup_iam_role():
-    """Remove IAM role"""
+    client = boto3.client("cognito-idp", region_name=region)
+    user_pool_id = cognito_config.get("user_pool_id")
+
+    # The custom domain must be deleted before the pool.
+    domain_url = cognito_config.get("domain_url", "")
+    if domain_url:
+        domain = domain_url.split("//")[-1].split(".")[0]
+        try:
+            client.delete_user_pool_domain(Domain=domain, UserPoolId=user_pool_id)
+            print(f"✅ Deleted Cognito domain: {domain}")
+            print("⏳ Waiting 15s for domain deletion to settle...")
+            time.sleep(15)
+        except ClientError as e:
+            print(f"⚠️  Domain deletion: {e}")
+
     try:
-        iam_client = boto3.client('iam')
-        role_name = "QuickSuiteLegalContractLambdaRole"
-        
-        # Detach policies
-        try:
-            iam_client.detach_role_policy(
-                RoleName=role_name,
-                PolicyArn='arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
-            )
-            iam_client.detach_role_policy(
-                RoleName=role_name,
-                PolicyArn='arn:aws:iam::aws:policy/AmazonBedrockFullAccess'
-            )
-        except:
-            pass
-        
-        # Delete inline policy
-        try:
-            iam_client.delete_role_policy(
-                RoleName=role_name,
-                PolicyName='BedrockAgentCoreAccess'
-            )
-        except:
-            pass
-        
-        # Delete role
-        iam_client.delete_role(RoleName=role_name)
-        print(f"✅ Deleted IAM role: {role_name}")
-    except Exception as e:
+        client.delete_user_pool(UserPoolId=user_pool_id)
+        print(f"✅ Deleted Cognito user pool: {user_pool_id}")
+    except ClientError as e:
+        if e.response["Error"]["Code"] == "ResourceNotFoundException":
+            print(f"ℹ️  User pool {user_pool_id} already gone")
+        else:
+            print(f"❌ Failed to delete user pool: {e}")
+
+
+def cleanup_iam_role(region):
+    client = boto3.client("iam", region_name=region)
+
+    try:
+        client.get_role(RoleName=LAMBDA_ROLE_NAME)
+    except ClientError:
+        print(f"ℹ️  IAM role {LAMBDA_ROLE_NAME} already gone")
+        return
+
+    # A role cannot be deleted while policies remain attached.
+    try:
+        for p in client.list_attached_role_policies(RoleName=LAMBDA_ROLE_NAME)["AttachedPolicies"]:
+            client.detach_role_policy(RoleName=LAMBDA_ROLE_NAME, PolicyArn=p["PolicyArn"])
+            print(f"   detached {p['PolicyName']}")
+        for name in client.list_role_policies(RoleName=LAMBDA_ROLE_NAME)["PolicyNames"]:
+            client.delete_role_policy(RoleName=LAMBDA_ROLE_NAME, PolicyName=name)
+            print(f"   removed inline policy {name}")
+        client.delete_role(RoleName=LAMBDA_ROLE_NAME)
+        print(f"✅ Deleted IAM role: {LAMBDA_ROLE_NAME}")
+    except ClientError as e:
         print(f"❌ Failed to delete IAM role: {e}")
 
-def cleanup_output_files():
-    """Remove generated output files"""
-    files_to_remove = [
-        'deployment/outputs/agents_deployment.json',
-        'quicksuite_integration_config.json', 
-        'quicksuite_openapi_schema.json',
-        '.bedrock_agentcore.yaml'
-    ]
-    
-    for file_path in files_to_remove:
-        try:
-            if os.path.exists(file_path):
-                os.remove(file_path)
-                print(f"✅ Removed: {file_path}")
-        except Exception as e:
-            print(f"❌ Failed to remove {file_path}: {e}")
+
+def cleanup_agent_stack(stack_name, region, wait=True):
+    """Delete the CDK stack that agentcore deploy created."""
+    if not stack_name:
+        print("⚠️  No stack name in deployed state, skipping agent teardown")
+        return
+
+    cfn = boto3.client("cloudformation", region_name=region)
+    try:
+        cfn.describe_stacks(StackName=stack_name)
+    except ClientError:
+        print(f"ℹ️  Stack {stack_name} not found, already deleted")
+        return
+
+    try:
+        cfn.delete_stack(StackName=stack_name)
+        print(f"🗑️  Deleting stack {stack_name} (this removes all agent runtimes)")
+    except ClientError as e:
+        print(f"❌ Failed to initiate stack deletion: {e}")
+        return
+
+    if not wait:
+        print("   Not waiting for completion. Check the CloudFormation console.")
+        return
+
+    print("⏳ Waiting for stack deletion (up to ~15 minutes)...")
+    try:
+        cfn.get_waiter("stack_delete_complete").wait(
+            StackName=stack_name,
+            WaiterConfig={"Delay": 15, "MaxAttempts": 60},
+        )
+        print(f"✅ Deleted stack: {stack_name}")
+    except Exception as e:
+        print(f"⚠️  Stack deletion did not confirm within the wait window: {e}")
+        print("   Check the CloudFormation console for the final state.")
+
+
+def cleanup_local_files():
+    for path in GENERATED_FILES:
+        if os.path.exists(path):
+            try:
+                os.remove(path)
+                print(f"✅ Removed {path}")
+            except OSError as e:
+                print(f"❌ Failed to remove {path}: {e}")
+
 
 def main():
-    print("🧹 Starting comprehensive cleanup of deployed resources...")
-    print("="*60)
-    print("This will remove:")
-    print("• AgentCore agents and CodeBuild projects")
-    print("• API Gateway endpoint")
-    print("• Lambda function")
-    print("• Cognito User Pool and domain")
-    print("• IAM roles")
-    print("• Generated output files")
-    print("="*60)
-    
-    # Load configurations
-    config = load_deployment_config()
-    agents_config = load_agents_config()
-    
-    # Cleanup in proper order
-    print("\n🗑️ Step 1: Cleaning up API Gateway...")
-    cleanup_api_gateway(config)
-    
-    print("\n🗑️ Step 2: Cleaning up Lambda function...")
-    cleanup_lambda_function(config)
-    
-    print("\n🗑️ Step 3: Cleaning up Cognito User Pool...")
-    cleanup_cognito_user_pool(config)
-    
-    print("\n🗑️ Step 4: Cleaning up IAM role...")
-    cleanup_iam_role()
-    
-    print("\n🗑️ Step 5: Cleaning up AgentCore agents and CodeBuild projects...")
-    cleanup_agentcore_agents(agents_config)
-    
-    print("\n🗑️ Step 6: Cleaning up output files...")
-    cleanup_output_files()
-    
-    print("\n" + "="*60)
-    print("🎉 Cleanup completed!")
-    print("All deployed resources have been removed.")
-    print("• AgentCore agents destroyed with CodeBuild projects")
-    print("• AWS resources (API Gateway, Lambda, Cognito) deleted")
-    print("• IAM roles and policies cleaned up")
-    print("• Local output files removed")
-    print("="*60)
+    parser = argparse.ArgumentParser(description="Tear down the legal contract analyzer.")
+    parser.add_argument("--yes", action="store_true", help="skip the confirmation prompt")
+    parser.add_argument("--target", default="default", help="AgentCore deployment target")
+    parser.add_argument("--no-wait", action="store_true",
+                        help="do not wait for stack deletion to finish")
+    parser.add_argument("--keep-agents", action="store_true",
+                        help="tear down only the Quick Suite layer, leave agents running")
+    args = parser.parse_args()
+
+    if not os.path.exists("deployment"):
+        print("❌ Run this from the legal-contract-solution directory.")
+        return 1
+
+    region = get_region()
+    qs_config = load_json(QS_CONFIG_PATH)
+    state = load_json(DEPLOYED_STATE_PATH)
+    stack_name = None if args.keep_agents else get_stack_name(state, args.target)
+
+    if not confirm(stack_name, qs_config, args.yes):
+        return 0
+
+    print(f"\n🌍 Region: {region}")
+
+    if qs_config:
+        print("\n🗑️  Step 1: API Gateway")
+        cleanup_api_gateway(qs_config, region)
+
+        print("\n🗑️  Step 2: Lambda function")
+        cleanup_lambda(qs_config, region)
+
+        print("\n🗑️  Step 3: Cognito user pool")
+        cleanup_cognito(qs_config, region)
+
+        print("\n🗑️  Step 4: IAM role")
+        cleanup_iam_role(region)
+
+    if stack_name:
+        print("\n🗑️  Step 5: AgentCore agents (CloudFormation stack)")
+        cleanup_agent_stack(stack_name, region, wait=not args.no_wait)
+
+    print("\n🗑️  Step 6: Generated local files")
+    cleanup_local_files()
+
+    print("\n" + "=" * 60)
+    print("🎉 Teardown complete")
+    print("\nNot removed (may be shared, delete manually if you want them gone):")
+    print("  • CDK bootstrap stack (CDKToolkit) and its staging bucket")
+    print("  • ECR images built for the agents")
+    print("  • CloudWatch log groups for the Lambda and agent runtimes")
+    print("=" * 60)
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

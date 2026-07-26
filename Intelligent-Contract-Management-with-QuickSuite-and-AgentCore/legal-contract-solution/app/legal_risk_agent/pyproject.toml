@@ -1,0 +1,12 @@
+[project]
+name = "legal-risk-agent"
+version = "1.0.0"
+description = "Legal risk assessment agent for contract analysis"
+requires-python = ">=3.12"
+dependencies = [
+    "bedrock-agentcore>=0.1.0",
+    "strands-agents>=0.1.0",
+    "strands-agents-tools>=0.1.0",
+    "boto3>=1.35.0",
+    "aws-opentelemetry-distro>=0.10.1",
+]

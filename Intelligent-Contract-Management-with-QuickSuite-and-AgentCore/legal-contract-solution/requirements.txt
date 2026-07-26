@@ -1,20 +1,14 @@
-bedrock-agentcore
-bedrock-agentcore-starter-toolkit
-strands-agents
-strands-agents-tools
-boto3
-botocore
-python-dotenv
-# Document processing libraries
-PyPDF2
-pdfplumber
-openpyxl
-pandas
-python-docx
-# Additional utilities
-chardet
-# Optional: for creating sample PDF files
-reportlab
-# Redshift connectivity
-psycopg2-binary
-redshift-connector
+# Local tooling for the scripts in deployment/.
+#
+# Agent runtime dependencies are NOT listed here. Each agent carries its own
+# app/<agent_name>/pyproject.toml, which is what the container build installs.
+#
+# Do not add bedrock-agentcore-starter-toolkit. It is deprecated and provides an
+# `agentcore` command that collides with the current CLI (npm i -g @aws/agentcore).
+#
+# Floors rather than exact pins: the bedrock-agentcore and
+# bedrock-agentcore-control clients require a recent SDK, and pinning exactly
+# tends to break as those APIs evolve.
+
+boto3>=1.40.0
+botocore>=1.40.0

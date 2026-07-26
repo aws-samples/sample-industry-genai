@@ -1,0 +1,229 @@
+MASTER PROFESSIONAL SERVICES AGREEMENT
+
+This Master Professional Services Agreement ("Agreement") is entered into as of July 25, 2026 ("Effective Date") by and between:
+
+Acme Technologies Inc., a Delaware corporation with its principal place of business at 1200 Innovation Drive, San Jose, CA 95134 ("Client")
+
+and
+
+Horizon Consulting Group LLC, a New York limited liability company with its principal place of business at 450 Park Avenue, New York, NY 10022 ("Service Provider")
+
+(each a "Party" and collectively the "Parties")
+
+WHEREAS, Client desires to engage Service Provider to perform cloud migration and data platform modernization services, and Service Provider is willing to perform such services under the terms and conditions set forth herein.
+
+NOW, THEREFORE, in consideration of the mutual covenants and agreements set forth herein, the Parties agree as follows:
+
+------------------------------------------------------------------------
+
+ARTICLE 1: SERVICES AND TERM
+
+1.1 Scope of Services. Service Provider shall provide the following services (the "Services"):
+
+   (a) migration of Client's on-premises workloads to a public cloud environment, including up to two hundred (200) application workloads;
+
+   (b) design and implementation of a consolidated data warehouse and reporting platform;
+
+   (c) integration of Client's financial reporting and revenue recognition systems with the new platform;
+
+   (d) knowledge transfer and administrator training for up to twenty-five (25) Client personnel.
+
+1.2 Term and Renewal. This Agreement shall commence on the Effective Date and continue for an initial period of twenty-four (24) months (the "Initial Term"). Upon expiration of the Initial Term, this Agreement shall automatically renew for successive twelve (12) month periods (each a "Renewal Term") unless either Party provides written notice of non-renewal at least one hundred twenty (120) days prior to the end of the then-current term.
+
+1.3 Service Levels. Service Provider shall maintain platform availability of 99.5% measured monthly. For each full percentage point below the committed availability, Client shall be entitled to a service credit equal to two percent (2%) of the monthly fee, provided that service credits shall not exceed five percent (5%) of the monthly fee in any calendar month and shall be Client's sole and exclusive remedy for availability failures.
+
+1.4 Milestones. Service Provider shall complete workload migration within twelve (12) months of the Effective Date. If Service Provider fails to achieve this milestone, Client may assess liquidated damages of $50,000 per month of delay, up to a maximum of $300,000.
+
+------------------------------------------------------------------------
+
+ARTICLE 2: FEES AND PAYMENT
+
+2.1 Monthly Fee. Client shall pay Service Provider a monthly fee of $85,000 for the Services, payable within thirty (30) days of receipt of invoice.
+
+2.2 Late Payment. Undisputed amounts not paid when due shall accrue interest at the rate of one and one-half percent (1.5%) per month, or the maximum rate permitted by applicable law, whichever is lower.
+
+2.3 Expenses. Client shall reimburse Service Provider for all reasonable travel, lodging, third-party software licensing, and cloud infrastructure costs incurred in connection with the Services. Such expenses shall be invoiced monthly at cost and are not subject to any aggregate cap or advance approval requirement.
+
+2.4 Fee Escalation. Beginning with the first Renewal Term, the monthly fee shall increase annually by an amount equal to the greater of five percent (5%) or the change in the Consumer Price Index for All Urban Consumers over the preceding twelve (12) months.
+
+2.5 Disputed Amounts. Client shall notify Service Provider of any disputed invoice amount within fifteen (15) days of receipt. Client shall pay all undisputed amounts pending resolution of the dispute.
+
+------------------------------------------------------------------------
+
+ARTICLE 3: CONFIDENTIALITY
+
+3.1 Confidential Information. Each Party agrees to maintain in strict confidence all proprietary information, trade secrets, technical data, business plans, customer lists, pricing, and other confidential information disclosed by the other Party ("Confidential Information").
+
+3.2 Exclusions. Confidential Information does not include information that: (a) is or becomes publicly available through no fault of the receiving Party; (b) was rightfully known to the receiving Party without restriction prior to disclosure; (c) is independently developed without reference to the disclosing Party's Confidential Information; or (d) is required to be disclosed by law, provided the receiving Party gives prompt notice where legally permitted.
+
+3.3 Non-Disclosure Period. The obligations under this Article 3 shall survive termination or expiration of this Agreement for a period of five (5) years.
+
+------------------------------------------------------------------------
+
+ARTICLE 4: DATA PROTECTION AND SECURITY
+
+4.1 Client Data. "Client Data" means all data, records, and content provided by Client or generated on Client's behalf in the performance of the Services, including personal information relating to Client's employees, customers, and end users.
+
+4.2 Processing of Personal Information. Client acknowledges that Client Data includes personal information relating to individuals located in the European Union, the United Kingdom, and the State of California. Service Provider shall process such personal information solely as necessary to perform the Services.
+
+4.3 Cross-Border Transfer. Service Provider may transfer, store, and process Client Data at its delivery centers in the United States and in Bengaluru, India, and may permit access by its personnel and subcontractors in those locations.
+
+4.4 Security Measures. Service Provider shall implement and maintain commercially reasonable administrative, technical, and physical safeguards designed to protect Client Data against unauthorized access, use, or disclosure.
+
+4.5 Security Incidents. Service Provider shall notify Client of any confirmed unauthorized access to or acquisition of Client Data within a commercially reasonable period following Service Provider's determination that such an incident has occurred. Service Provider shall bear the costs of investigation and remediation of incidents caused by its own failure to comply with Section 4.4.
+
+4.6 Analytics and Product Improvement. Service Provider may retain and use Client Data in aggregated and de-identified form for benchmarking, service improvement, and development of Service Provider's own products and offerings, during the Term and thereafter in perpetuity.
+
+4.7 Return and Deletion. Upon written request following termination, Service Provider shall delete or return Client Data within ninety (90) days, except for copies retained in routine backup media or as required by applicable law.
+
+------------------------------------------------------------------------
+
+ARTICLE 5: INTELLECTUAL PROPERTY
+
+5.1 Deliverables. Subject to Client's payment of all amounts due under this Agreement, Service Provider assigns to Client all right, title, and interest in the specific written deliverables identified in a mutually executed statement of work ("Deliverables").
+
+5.2 Service Provider Materials. Service Provider retains all right, title, and interest in its pre-existing intellectual property and in any tools, frameworks, accelerators, templates, methodologies, code libraries, and know-how used or developed in the course of performing the Services ("Provider Materials"), including any improvements or derivatives thereof.
+
+5.3 License to Client. Service Provider grants Client a non-exclusive, non-transferable, revocable license to use Provider Materials solely to the extent embedded in the Deliverables and solely for Client's internal business purposes during the Term.
+
+5.4 Feedback. Any suggestions, feedback, or recommendations provided by Client regarding the Services or Provider Materials may be used by Service Provider without restriction or obligation.
+
+------------------------------------------------------------------------
+
+ARTICLE 6: PERSONNEL AND SUBCONTRACTORS
+
+6.1 Independent Contractor. Service Provider is an independent contractor. Nothing in this Agreement creates a partnership, joint venture, agency, or employment relationship between the Parties.
+
+6.2 Subcontracting. Service Provider may engage subcontractors to perform any portion of the Services without Client's prior consent, provided Service Provider remains responsible for their performance.
+
+6.3 Key Personnel. Service Provider shall use reasonable efforts to maintain continuity of the personnel assigned to the engagement but may reassign personnel at its discretion.
+
+6.4 Non-Solicitation. During the Term and for twenty-four (24) months thereafter, Client shall not directly or indirectly solicit for employment or hire any employee or contractor of Service Provider who performed Services under this Agreement. In the event of a breach, Client shall pay Service Provider a placement fee equal to one hundred percent (100%) of the individual's annual base compensation.
+
+------------------------------------------------------------------------
+
+ARTICLE 7: INDEMNIFICATION
+
+7.1 Indemnification by Service Provider. Service Provider shall indemnify, defend, and hold harmless Client, its officers, directors, employees, agents, successors, and assigns (collectively, "Client Indemnitees") from and against any and all claims, demands, losses, damages, liabilities, costs, and expenses (including reasonable attorneys' fees and court costs) ("Losses") arising out of or relating to:
+
+   (a) any breach by Service Provider of any representation, warranty, or obligation under this Agreement;
+
+   (b) any negligent or wrongful act or omission of Service Provider or its personnel or subcontractors in the performance of the Services;
+
+   (c) any infringement or misappropriation of any third-party intellectual property rights resulting from the Services, the Deliverables, or the Provider Materials;
+
+   (d) any violation of applicable law, regulation, or industry standard by Service Provider in connection with this Agreement;
+
+   (e) any unauthorized access to, use, or disclosure of Client Data attributable to Service Provider, its personnel, or its subcontractors.
+
+7.2 Indemnification by Client. Client shall indemnify, defend, and hold harmless Service Provider, its officers, directors, employees, agents, successors, and assigns (collectively, "Provider Indemnitees") from and against any and all Losses arising out of or relating to:
+
+   (a) any breach by Client of any representation, warranty, or obligation under this Agreement;
+
+   (b) any materials, data, or information provided by Client to Service Provider that infringes or misappropriates any third-party intellectual property rights;
+
+   (c) Client's use of the Deliverables in a manner not contemplated by or inconsistent with this Agreement.
+
+7.3 Indemnification Procedure. The indemnified Party shall: (i) provide prompt written notice of any claim for which indemnification is sought; (ii) grant the indemnifying Party sole control of the defense and settlement of such claim; and (iii) provide reasonable cooperation at the indemnifying Party's expense. Failure to provide timely notice shall not relieve the indemnifying Party of its obligations except to the extent such failure materially prejudices the defense.
+
+------------------------------------------------------------------------
+
+ARTICLE 8: LIMITATION OF LIABILITY
+
+8.1 Cap on Liability. EXCEPT AS SET FORTH IN SECTION 8.3, IN NO EVENT SHALL EITHER PARTY'S TOTAL AGGREGATE LIABILITY ARISING OUT OF OR RELATED TO THIS AGREEMENT EXCEED THE TOTAL FEES PAID OR PAYABLE TO SERVICE PROVIDER DURING THE TWELVE (12) MONTH PERIOD IMMEDIATELY PRECEDING THE EVENT GIVING RISE TO SUCH LIABILITY (THE "LIABILITY CAP").
+
+8.2 Exclusion of Consequential Damages. IN NO EVENT SHALL EITHER PARTY BE LIABLE TO THE OTHER PARTY FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO LOSS OF PROFITS, LOSS OF REVENUE, LOSS OF DATA, BUSINESS INTERRUPTION, OR LOSS OF BUSINESS OPPORTUNITY, REGARDLESS OF THE CAUSE OF ACTION OR THE THEORY OF LIABILITY, EVEN IF SUCH PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+8.3 Exceptions to Limitations. The limitations set forth in Sections 8.1 and 8.2 shall NOT apply to, and neither Party's liability shall be limited in any respect with regard to:
+
+   (a) either Party's indemnification obligations under Article 7;
+
+   (b) damages arising from a Party's gross negligence, fraud, or willful misconduct;
+
+   (c) breaches of confidentiality obligations under Article 3;
+
+   (d) any unauthorized access to, use, or disclosure of Client Data, or breach of Article 4;
+
+   (e) Client's payment obligations under Article 2.
+
+8.4 Essential Basis of Bargain. THE PARTIES ACKNOWLEDGE THAT THE LIMITATIONS OF LIABILITY SET FORTH IN THIS ARTICLE 8 REFLECT THE ALLOCATION OF RISK BETWEEN THE PARTIES AND FORM AN ESSENTIAL BASIS OF THE BARGAIN BETWEEN THEM.
+
+------------------------------------------------------------------------
+
+ARTICLE 9: INSURANCE
+
+9.1 Required Coverage. Service Provider shall maintain, at its own expense, commercial general liability insurance with limits of not less than $2,000,000 per occurrence and $5,000,000 in the aggregate, and professional liability (errors and omissions) insurance with limits of not less than $2,000,000 per claim.
+
+9.2 Certificates. Upon Client's written request, Service Provider shall furnish certificates of insurance evidencing the coverage required under Section 9.1.
+
+------------------------------------------------------------------------
+
+ARTICLE 10: TERMINATION
+
+10.1 Termination for Convenience. Either Party may terminate this Agreement for any reason or no reason upon ninety (90) days' prior written notice to the other Party.
+
+10.2 Early Termination Fee. If Client terminates for convenience under Section 10.1 prior to the end of the then-current term, Client shall pay Service Provider an early termination fee equal to fifty percent (50%) of the monthly fees that would have become payable for the remainder of the then-current term.
+
+10.3 Termination for Cause. Either Party may terminate this Agreement immediately upon written notice if the other Party:
+
+   (a) commits a material breach of this Agreement and fails to cure such breach within thirty (30) days after receiving written notice specifying the breach in reasonable detail;
+
+   (b) becomes insolvent, files a petition in bankruptcy, makes an assignment for the benefit of creditors, or has a receiver appointed for a substantial portion of its assets;
+
+   (c) ceases to conduct business in the normal course, or is subject to a dissolution or liquidation proceeding.
+
+10.4 Termination for Non-Payment. Service Provider may terminate this Agreement, or suspend performance of the Services, upon fifteen (15) days' written notice if Client fails to pay any undisputed amount within sixty (60) days of its due date.
+
+10.5 Termination for Change of Control. Either Party may terminate this Agreement upon thirty (30) days' written notice if the other Party undergoes a Change of Control. "Change of Control" means any merger, acquisition, sale of substantially all assets, or transaction resulting in a change of more than fifty percent (50%) of the voting interests of a Party.
+
+10.6 Effects of Termination. Upon termination or expiration of this Agreement:
+
+   (a) Service Provider shall cease performance of the Services;
+
+   (b) Client shall pay Service Provider for all Services performed and expenses incurred through the effective date of termination, plus any early termination fee due under Section 10.2;
+
+   (c) each Party shall return or destroy all Confidential Information of the other Party within thirty (30) days, subject to Section 4.7;
+
+   (d) any transition assistance requested by Client shall be provided at Service Provider's then-current hourly rates for a period not to exceed sixty (60) days following termination;
+
+   (e) all licenses granted under Section 5.3 shall immediately terminate.
+
+10.7 Survival. The following provisions shall survive termination or expiration of this Agreement: Articles 3, 4, 5, 7, 8, and 11, Sections 2.2 and 6.4, and this Section 10.7.
+
+------------------------------------------------------------------------
+
+ARTICLE 11: DISPUTE RESOLUTION
+
+11.1 Governing Law. This Agreement shall be governed by and construed in accordance with the laws of the State of New York, without regard to its conflicts of law principles.
+
+11.2 Escalation. The Parties shall attempt in good faith to resolve any dispute through negotiation between senior executives for a period of thirty (30) days before initiating formal proceedings.
+
+11.3 Arbitration. Any dispute arising out of or relating to this Agreement that is not resolved under Section 11.2 shall be submitted to binding arbitration administered by the American Arbitration Association under its Commercial Arbitration Rules, seated in New York, New York. Each Party waives any right to a trial by jury and to participate in any class or collective proceeding.
+
+------------------------------------------------------------------------
+
+ARTICLE 12: GENERAL PROVISIONS
+
+12.1 Assignment. Neither Party may assign this Agreement without the prior written consent of the other Party, except that either Party may assign this Agreement to an affiliate or in connection with a merger, acquisition, or sale of substantially all of its assets without such consent.
+
+12.2 Force Majeure. Neither Party shall be liable for any delay or failure to perform resulting from causes beyond its reasonable control, including acts of God, war, terrorism, civil unrest, labor disputes, epidemic, or failure of public infrastructure or third-party cloud providers.
+
+12.3 Entire Agreement. This Agreement, together with all statements of work and exhibits, constitutes the entire agreement between the Parties and supersedes all prior negotiations, representations, and agreements.
+
+12.4 Amendments. No amendment or modification of this Agreement shall be valid unless made in writing and signed by authorized representatives of both Parties.
+
+12.5 Severability. If any provision of this Agreement is held unenforceable, the remaining provisions shall remain in full force and effect.
+
+12.6 Notices. All notices shall be in writing and delivered to the addresses set forth above.
+
+------------------------------------------------------------------------
+
+IN WITNESS WHEREOF, the Parties have executed this Agreement as of the Effective Date.
+
+
+ACME TECHNOLOGIES INC.                    HORIZON CONSULTING GROUP LLC
+
+By: _____________________________          By: _____________________________
+Name: Sarah Mitchell                       Name: David Chen
+Title: Chief Operating Officer             Title: Managing Partner
+Date: July 25, 2026                        Date: July 25, 2026

@@ -1,0 +1,74 @@
+SAMPLE QUESTIONS FOR THE LEGAL CONTRACT ANALYZER
+Companion to sample_contract.txt. See SAMPLE_CONTRACT.md for which contract clause
+each question targets and what the analyzer is expected to find.
+
+Paste one of these into the "user_question" field alongside the contract text.
+Leaving the question blank produces a full executive-summary report instead.
+
+
+== OPENING THE DEMO ==========================================================
+
+Give me an executive summary of this contract.
+
+What are the key risks in the termination, indemnification, and liability
+provisions?
+
+Should we approve this contract?
+
+
+== LIABILITY AND INDEMNIFICATION =============================================
+
+Is our liability actually capped under this agreement?
+
+What is our maximum financial exposure if there is a data breach?
+
+Is the indemnification balanced between the two parties?
+
+Does our insurance coverage match our contractual exposure?
+
+
+== DATA PROTECTION AND COMPLIANCE ============================================
+
+Are we GDPR and CCPA compliant if we sign this?
+
+Where is our data being processed, and what protections apply?
+
+What happens to our data if we terminate?
+
+Can the Service Provider use our data for its own purposes?
+
+
+== COMMERCIAL TERMS ==========================================================
+
+What are our total costs over the full term?
+
+Are there any uncapped or open-ended costs in this agreement?
+
+How easily can we exit this contract?
+
+What notice do we have to give to avoid automatic renewal?
+
+
+== INTELLECTUAL PROPERTY =====================================================
+
+Who owns the deliverables and the tooling?
+
+What happens to our license to the Provider's tools after termination?
+
+
+== NEGOTIATION FOCUSED =======================================================
+
+Which three clauses should we push back on first?
+
+Draft the redlines we should request before signing.
+
+What would you change to make this contract acceptable to us as the Client?
+
+
+== FOLLOW-UP PROBES (good for showing depth) =================================
+
+You flagged the liability cap. Walk me through exactly how it fails.
+
+Compare the termination rights of the two parties side by side.
+
+Which of these risks would you escalate to the General Counsel?
