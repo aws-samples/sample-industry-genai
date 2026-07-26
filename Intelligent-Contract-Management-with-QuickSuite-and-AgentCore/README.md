@@ -1,365 +1,238 @@
-# Legal Contract AI Solution 🚀
+# Intelligent Contract Management with Amazon Quick and AgentCore
 
-A comprehensive AI-powered legal contract analysis and risk assessment system built using Amazon Bedrock AgentCore and Amazon Quick Suite integration.
+A multi-agent legal contract analyzer built on Amazon Bedrock AgentCore, surfaced to end
+users through Amazon Quick. Four specialized agents extract clauses, assess risk, check
+regulatory compliance, and synthesize an executive report with an approve/review/reject
+recommendation.
 
-## 🌟 Overview
-
-This solution demonstrates a practical implementation of Generative AI for legal contract analysis. It showcases how organizations can leverage AWS GenAI services to automate contract review, assess risks, and ensure compliance.
-
-## 🏗️ Architecture
+## Architecture
 
 ![Architecture Diagram](legal-contract-solution/architecture.png)
 
-The system consists of 4 specialized AI agents that work together to analyze legal contracts:
-
 ```
-Legal Contract AI Assistant
-├── 📋 Legal Clause Agent - Extract key clauses
-├── ⚠️ Legal Risk Agent - Flags risky clauses  
-├── ✅ Compliance Agent - Check company policies
-└── 📝 Response Agent - Generate summaries
+Quick Suite  ──►  API Gateway  ──►  Lambda  ──┬──►  Legal Clause Agent    ─┐
+              (Cognito OAuth)    (orchestrator)├──►  Legal Risk Agent      ─┤ in parallel
+                                               └──►  Compliance Agent      ─┘
+                                                          │
+                                                          ▼
+                                              Response Agent (synthesis)
 ```
 
-## 📋 Solution Details
+The Lambda fans out to the three analysis agents concurrently, then passes their combined
+output to the response agent.
 
-**Use Case**: AI-powered legal contract analysis and risk assessment system
+| Agent | Role | Output |
+|---|---|---|
+| `legal_clause_agent` | Extracts and categorizes key clauses | Up to 10 clauses with type, summary, importance, key terms |
+| `legal_risk_agent` | Assesses legal, financial, operational risk | Up to 5 risks with severity, impact, mitigation, plus a 0-100 score |
+| `compliance_agent` | Checks regulatory and policy compliance | Five compliance areas with status, gaps, severity, plus a 0-100 score |
+| `response_agent` | Synthesizes the other three into a report | Markdown executive report and a decision recommendation |
 
-**Key Features**:
-- Multi-agent contract analysis (clause extraction, risk assessment, compliance checking)
-- Multi-format document support (PDF, Word, Excel, Text files)
-- Real-time risk scoring and compliance validation
-- Amazon Quick Suite integration for enterprise UI
-- Cloud-native deployment with no Docker required
-- File size validation with 10MB limit and automatic encoding detection
-- Configurable risk thresholds and compliance policies
-- Automated notifications for legal team review
-
-**AWS Services Used**:
-- Amazon Bedrock (Claude 3 models)
-- Amazon Bedrock AgentCore Runtime
-- AWS Lambda (for agent deployment)
-- Amazon API Gateway (REST endpoints)
-- Amazon Cognito (OAuth authentication)
-- AWS IAM (security and permissions)
-
-**Business Impact**:
-- Standardized risk assessment across legal teams
-- Automated compliance checking against company policies
-- Improved accuracy in identifying critical contract clauses
-
-## 📁 Project Structure
+## Repository layout
 
 ```
 legal-contract-solution/
-├── agents/                 # AI agent implementations
-├── deployment/            # Deployment scripts and outputs
-│   ├── deploy_agents.py                 # Deploy AgentCore agents
-│   ├── deploy_quicksuite_integration.py # Deploy Quick Suite integration
-│   ├── cleanup.py                       # Remove all resources
-│   └── outputs/                         # Generated deployment files
-├── ui/quick-suite/        # Amazon Quick Suite integration
-│   ├── agentcore_invoke_lambda.py       # Lambda function
-│   └── api_gateway_openapi_schema.json  # API schema
-├── config.py             # Configuration settings
-└── requirements.txt      # Python dependencies
+├── agentcore/                     # AgentCore CLI project
+│   ├── agentcore.json             # Agent (runtime) definitions
+│   ├── aws-targets.json           # Deployment target: account + region
+│   ├── cdk/                       # Generated CDK infrastructure
+│   └── .cli/                      # Generated at deploy time, not committed
+├── app/                           # Agent source — one directory per agent
+│   ├── legal_clause_agent/        #   main.py, pyproject.toml, Dockerfile
+│   ├── legal_risk_agent/
+│   ├── compliance_agent/
+│   └── response_agent/
+├── deployment/
+│   ├── quicksuite_lambda.py       # Orchestrating Lambda handler
+│   ├── deploy_quicksuite_integration.py  # Lambda + Cognito + API Gateway + schema
+│   └── cleanup.py                 # Teardown
+├── ui/quick-suite/
+│   └── api_gateway_openapi_schema.json   # Schema template for Quick Suite import
+├── sample_contract.txt            # Test contract with known, documented defects
+├── sample_questions.txt           # Questions to ask about it
+├── SAMPLE_CONTRACT.md             # What is wrong with the contract and why
+└── requirements.txt               # Local tooling only (boto3)
 ```
 
-## 🚀 Getting Started
+Agent runtime dependencies live in each `app/<agent>/pyproject.toml`, not in
+`requirements.txt`.
 
-### Prerequisites
-- AWS Account with appropriate permissions
-- Python 3.10 or higher
-- AWS CLI configured
-- Basic understanding of AWS services
+## Prerequisites
 
-### Quick Start
+- AWS account with Amazon Bedrock model access
+- **Node.js 20+** — the AgentCore CLI is distributed via npm
+- **Python 3.12+** and the AWS CLI, configured with credentials
+- No local Docker required; container images are built remotely by AWS CodeBuild
 
-1. **Clone the repository**:
-   ```bash
-   git clone <repository-url>
-   cd legal-contract-solution
-   ```
+Install the CLI:
 
-2. **Create and activate virtual environment**:
-   ```bash
-   # Create virtual environment
-   python -m venv .venv
-   
-   # Activate virtual environment
-   # On macOS/Linux:
-   source .venv/bin/activate
-   
-   # On Windows:
-   .venv\Scripts\activate
-   ```
+```bash
+npm install -g @aws/agentcore
+```
 
-3. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+> If you previously used `bedrock-agentcore-starter-toolkit`, uninstall it. It is deprecated
+> and provides a conflicting `agentcore` command:
+> `pip uninstall bedrock-agentcore-starter-toolkit`
 
-4. **Configure AWS credentials**:
-   ```bash
-   aws configure
-   ```
+### Model access
 
-5. **Enable Amazon Bedrock models**:
-   - Go to AWS Console → Amazon Bedrock → Model access
-   - Request access to Claude 3 models (Haiku, Sonnet, Opus)
+Agents default to `us.anthropic.claude-haiku-4-5-20251001-v1:0`. Note this is an **inference
+profile ID**, not a bare model ID. Current Claude models do not support on-demand invocation
+by raw model ID and will fail with:
 
-## 🚀 Deployment
+```
+Invocation of model ID ... with on-demand throughput isn't supported.
+Retry your request with the ID or ARN of an inference profile.
+```
 
-### Deploy Agents to AWS
+List what your account can use:
 
-Deploy all 4 AI agents using AgentCore:
+```bash
+aws bedrock list-inference-profiles --region us-east-1 \
+  --query 'inferenceProfileSummaries[?contains(inferenceProfileName, `Claude`)].[inferenceProfileId,status]' \
+  --output table
+```
+
+Claude 3.x models are marked `LEGACY` and are blocked for accounts that have not invoked them
+recently, so prefer an `ACTIVE` profile. To change models, edit the `BEDROCK_MODEL_ID`
+environment variable in `agentcore/agentcore.json` and redeploy.
+
+## Deploy
+
+### 1. Set your deployment target
+
+`agentcore/aws-targets.json` ships with a placeholder account. Replace it with yours:
 
 ```bash
 cd legal-contract-solution
-python deployment/deploy_agents.py
+sed -i '' "s/123456789012/$(aws sts get-caller-identity --query Account --output text)/" \
+  agentcore/aws-targets.json
 ```
 
-**What it does:**
-- Uses `agentcore deploy --mode cloud` for each agent
-- Deploys 4 specialized agents sequentially:
-  - Legal Clause Extraction Agent
-  - Legal Risk Assessment Agent  
-  - Compliance Checking Agent
-  - Response Generation Agent
-- Creates individual `agentcore.yaml` configs per agent
-- Uses cloud-native ARM64 container builds (no local Docker required)
+Adjust `region` in the same file if you are not deploying to `us-east-1`.
 
-### Deploy Quick Suite Integration
-
-**Prerequisites:** Agents must be deployed first (run the command above).
-
-For Amazon Quick Suite frontend integration:
+### 2. Deploy the agents
 
 ```bash
-cd legal-contract-solution
+agentcore validate      # check agentcore/ config
+agentcore deploy        # build images in CodeBuild, deploy via CDK
+```
+
+This creates one AgentCore runtime per agent plus a CloudFormation stack named
+`AgentCore-LegalContractAnalyzer-default`. First deploy takes several minutes because
+CodeBuild builds four ARM64 images. Confirm afterwards:
+
+```bash
+agentcore status
+```
+
+### 3. Deploy the Quick Suite integration
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
 python deployment/deploy_quicksuite_integration.py
 ```
 
-**What it does:**
-- Creates Lambda function with AgentCore integration
-- Sets up API Gateway with OAuth 2.0 authentication
-- Configures Cognito User Pool for secure access
-- Generates OpenAPI schema for Quick Suite import
-- Outputs integration credentials and endpoints
+This reads the agent ARNs from `agentcore/.cli/deployed-state.json` and creates the Lambda,
+a Cognito user pool with a client-credentials app client, an API Gateway REST API with a
+Cognito authorizer, and a ready-to-import OpenAPI schema. It writes two gitignored files:
 
-## 🖥️ Using Amazon Quick Suite
+- `quicksuite_integration_config.json` — includes the **client secret**, do not commit
+- `quicksuite_openapi_schema.json` — import this into Quick Suite
 
-Once deployed, integrate with Amazon Quick Suite:
+### 4. Connect Quick Suite
 
-1. **Get integration credentials**:
-   - Check `quicksuite_integration_config.json` in the project root
-   - Contains OAuth Client ID, Secret, and Token URL
+1. Quick Suite console → **Connectors** → **Create for your team** → **OpenAPI Specification**
+2. Import `quicksuite_openapi_schema.json`
+3. Choose **Service authentication** (client credentials) and supply the client ID, client
+   secret, and token URL from `quicksuite_integration_config.json`
 
-2. **Import to Quick Suite**:
-   - Use the generated OpenAPI schema
-   - Configure OAuth 2.0 client credentials flow
-   - Set up the API endpoint
+## Try it
 
-3. **Features available**:
-   - Document upload interface (PDF, Word, Excel)
-   - Real-time contract analysis
-   - Risk assessment visualization
-   - Compliance checking results
-   - Interactive AI-powered analysis
+`sample_contract.txt` is a 19,000-character services agreement seeded with 15 documented
+defects — an indemnity carved out of the liability cap, a "commercially reasonable" breach
+notice instead of GDPR's 72 hours, cross-border PII transfer with no DPA, an evergreen
+auto-renewal, and others. `SAMPLE_CONTRACT.md` maps each defect to the clause and the agent
+expected to catch it; `sample_questions.txt` has questions to ask.
 
-## 🧹 Cleanup
-
-To remove all deployed AWS resources:
+Invoke the orchestrating Lambda directly:
 
 ```bash
-cd legal-contract-solution
-python deployment/cleanup.py
+python3 -c "import json;c=open('sample_contract.txt').read();q='Is our liability actually capped under this agreement?';open('/tmp/payload.json','w').write(json.dumps({'body':json.dumps({'contract_text':c,'user_question':q})}))"
+
+aws lambda invoke \
+  --function-name legal-contract-api \
+  --cli-binary-format raw-in-base64-out \
+  --payload file:///tmp/payload.json \
+  --region us-east-1 \
+  /tmp/response.json
+
+python3 -c "import json;d=json.load(open('/tmp/response.json'));b=json.loads(d['body']);print(b['agent_results']);print(b['contract_analysis'].get('summary_response',''))"
 ```
 
-This removes agents, API Gateway, Lambda functions, Cognito User Pool, IAM roles, and generated files.
+`agent_results` reports per-agent status and is the fastest way to confirm all four agents
+ran rather than the request degrading to a partial answer.
 
-## 🏗️ Agent Architecture
+## Teardown
 
-### Legal Clause Agent
-```python
-# Extract key clauses from contracts
-from agents.legal_clause_agent import LegalClauseAgent
-clause_agent = LegalClauseAgent()
-result = clause_agent.extract_clauses(contract_text)
+```bash
+python deployment/cleanup.py          # prompts for confirmation
+python deployment/cleanup.py --yes    # non-interactive
+python deployment/cleanup.py --keep-agents   # Quick Suite layer only
 ```
 
-**Capabilities:**
-- Payment terms and conditions
-- Termination clauses
-- Liability and indemnification
-- Intellectual property clauses
-- Confidentiality terms
-- Governing law and jurisdiction
+Removes the API Gateway, Lambda, Cognito pool, IAM role, and the CloudFormation stack holding
+the agent runtimes. Deliberately left in place because they may be shared: the CDK bootstrap
+stack (`CDKToolkit`) and its staging bucket, ECR images, and CloudWatch log groups.
 
-### Legal Risk Agent
-```python
-# Assess legal risks and liabilities
-from agents.legal_risk_agent import LegalRiskAgent
-risk_agent = LegalRiskAgent()
-result = risk_agent.assess_risks(contract_text)
+## Troubleshooting
+
+**`Access denied. This Model is marked by provider as Legacy`**
+The configured model is `LEGACY` and unused for 30+ days. Switch to an `ACTIVE` profile.
+
+**504 Gateway Timeout**
+The analysis exceeded the API Gateway integration timeout, most often because of a cold
+container start. Send one throwaway request to warm the agents. If it persists, reduce the
+per-agent output caps (`*_MAX_TOKENS`, `RISK_AGENT_MAX_RISKS`, `CLAUSE_AGENT_MAX_CLAUSES`)
+in the agents' `envVars` in `agentcore/agentcore.json` and redeploy.
+
+**Agent returns a generic template instead of analyzing the contract**
+The response agent received no `contract_text` and no upstream analyses. Check that the
+Lambda's `ALL_AGENT_ARNS` environment variable is populated and that `agent_results` does not
+show `skipped`.
+
+**Agent status is `error` but the runtime is healthy**
+Usually the agent's JSON parse step failing on a Markdown-fenced response. Each agent strips
+``` fences before parsing; check CloudWatch logs for the raw response.
+
+Agent logs:
+
+```bash
+agentcore logs --runtime legal_risk_agent --level error
+aws logs tail /aws/lambda/legal-contract-api --follow
 ```
 
-**Risk Categories:**
-- Financial risks
-- Operational risks
-- Legal compliance risks
-- Regulatory risks
-- Reputational risks
+## Security notes
 
-### Compliance Agent
-```python
-# Check against company policies
-from agents.compliance_agent import ComplianceAgent
-compliance_agent = ComplianceAgent()
-result = compliance_agent.check_compliance(contract_text)
-```
+- API Gateway is protected by a Cognito authorizer using the OAuth 2.0 client credentials
+  flow with a scoped resource server. There is no unauthenticated path to the agents.
+- `quicksuite_integration_config.json` contains the Cognito **client secret** and is
+  gitignored. Do not commit it.
+- `agentcore/.env.local` is gitignored and should hold any local API keys.
+- The Lambda execution role grants `bedrock-agentcore:InvokeAgentRuntime` and
+  `GetAgentRuntime` on `Resource: "*"`. Scope this to specific runtime ARNs for production.
+- Contract text is sent to Amazon Bedrock for inference and appears in CloudWatch logs at
+  INFO level. Review log retention and redaction before using real contracts.
 
-**Compliance Areas:**
-- GDPR/CCPA data privacy
-- SOX financial regulations
-- Employment law compliance
-- IP protection requirements
-- Industry-specific regulations
+## Further reading
 
-### Response Agent
-```python
-# Generate comprehensive analysis summaries
-from agents.response_agent import ResponseAgent
-response_agent = ResponseAgent()
-result = response_agent.generate_response(clauses, risks, compliance_results)
-```
+- [AgentCore CLI](https://github.com/aws/agentcore-cli)
+- [Amazon Bedrock AgentCore Runtime](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/)
+- [Quick Suite OpenAPI integration](https://docs.aws.amazon.com/quick/latest/userguide/openapi-integration.html)
+- [Quick Suite MCP integration](https://docs.aws.amazon.com/quick/latest/userguide/mcp-integration.html)
+- [Strands Agents](https://strandsagents.com/)
 
-**Capabilities:**
-- Synthesizes analysis from all agents
-- Generates human-readable summaries
-- Provides actionable recommendations
-- Creates executive summaries
-- Formats results for different audiences
+## License
 
-## 🏗️ AWS Services Integration
-
-- **Amazon Bedrock**: Core GenAI capabilities with Claude models
-- **AgentCore Runtime**: Serverless agent hosting and orchestration
-- **AWS Lambda**: Serverless compute for API endpoints
-- **Amazon API Gateway**: RESTful API endpoints with authentication
-- **Amazon Cognito**: OAuth 2.0 authentication for Quick Suite
-- **AWS IAM**: Security and access control
-- **Amazon CloudWatch**: Monitoring and logging
-
-## 💡 Solution Overview
-
-| Aspect | Details |
-|--------|---------|
-| Primary Use Case | Contract Analysis & Risk Assessment |
-| Complexity | Medium |
-| AWS Services | Bedrock, AgentCore, Lambda, API Gateway, Cognito |
-| Frontend | Amazon Quick Suite |
-| ROI Timeline | 3-6 months |
-
-## 🔒 Security & Compliance
-
-Enterprise-grade security features:
-- **Data Encryption**: At rest and in transit
-- **OAuth 2.0 Authentication**: Secure API access
-- **Access Control**: IAM roles and policies
-- **Audit Logging**: CloudTrail integration
-- **Compliance**: Industry-specific requirements (HIPAA, SOX, GDPR)
-- **Network Security**: VPC deployment options
-
-## 📊 Performance & Scaling
-
-### Benchmarks
-- **Processing Speed**: 1000+ documents per hour
-- **Accuracy**: 95%+ for contract analysis tasks
-- **Availability**: 99.9% uptime with proper AWS deployment
-- **Scalability**: Auto-scaling based on demand
-
-### Cost Optimization
-- **Pay-per-use**: Only pay for actual processing
-- **Serverless Architecture**: No infrastructure management
-- **Reserved Capacity**: For predictable workloads
-- **Multi-region**: For global deployments
-
-## 🧪 Testing
-
-### Verify Deployment
-After deploying agents and Quick Suite integration, test the system:
-
-1. **Check deployment outputs**:
-   ```bash
-   ls deployment/outputs/  # For agents deployment info
-   ls *.json              # For Quick Suite integration files
-   # Should show: agents_deployment.json (in outputs/), quicksuite_integration_config.json, quicksuite_openapi_schema.json (in root)
-   ```
-
-2. **Test via Quick Suite**:
-   - Import the generated OpenAPI schema into Quick Suite
-   - Upload a sample contract document
-   - Verify the 4-agent analysis pipeline works
-
-### Troubleshooting
-- **Agent deployment issues**: Check AWS CloudWatch logs for AgentCore
-- **API Gateway errors**: Verify Cognito authentication configuration
-- **Model access**: Ensure Bedrock models are enabled in your region
-
-## 🌟 Key Highlights
-
-- **Multi-agent architecture** with specialized AI agents
-- **Real-time processing** of legal documents
-- **Amazon Quick Suite integration** for enterprise UI
-- **Cloud-native deployment** using AWS AgentCore
-- **OAuth 2.0 security** with Cognito integration
-- **Production-ready** with comprehensive error handling
-- **No Docker required** - uses AWS CodeBuild for builds
-
-## 🤝 Contributing
-
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details on:
-- Adding new features
-- Improving existing functionality
-- Reporting issues and bugs
-- Suggesting enhancements
-
-### Development Guidelines
-1. Follow AWS Well-Architected Framework principles
-2. Implement comprehensive error handling
-3. Include security best practices
-4. Provide thorough documentation
-5. Test all changes thoroughly
-
-## 📚 Resources
-
-### AWS Documentation
-- [Amazon Bedrock User Guide](https://docs.aws.amazon.com/bedrock/)
-- [Amazon Bedrock AgentCore](https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html)
-- [AWS AI/ML Services](https://aws.amazon.com/machine-learning/)
-- [AWS Architecture Center](https://aws.amazon.com/architecture/)
-
-### Training & Certification
-- [AWS AI/ML Learning Path](https://aws.amazon.com/training/learning-paths/machine-learning/)
-- [Generative AI with AWS](https://aws.amazon.com/generative-ai/)
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-### Getting Help
-1. **Documentation**: This README contains all necessary instructions
-2. **Issues**: Create GitHub issues for bugs or feature requests
-3. **AWS Support**: For AWS service-specific issues
-
-### Common Issues
-- **Model Access**: Ensure Bedrock models are enabled in your region
-- **Permissions**: Verify IAM roles have necessary permissions
-- **Quotas**: Check service quotas for high-volume usage
-- **Regions**: Some services may not be available in all regions
-
----
-
-*Built with ❤️ using Amazon Bedrock AgentCore and Amazon Quick Suite. Empowering legal teams with intelligent contract analysis.*
+MIT — see [LICENSE](../LICENSE). Contributions welcome; see [CONTRIBUTING.md](CONTRIBUTING.md).

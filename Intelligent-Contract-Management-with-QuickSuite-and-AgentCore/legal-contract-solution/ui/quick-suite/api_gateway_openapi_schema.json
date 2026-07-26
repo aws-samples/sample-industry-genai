@@ -2,12 +2,12 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Legal Contract Analysis API",
-    "version": "1.0.0",
-    "description": "API for analyzing legal contracts using AI agents"
+    "version": "2.0.0",
+    "description": "AI-powered legal contract analysis. Orchestrates four Amazon Bedrock AgentCore agents to extract clauses, assess risk, check regulatory compliance, and synthesize an executive report."
   },
   "servers": [
     {
-      "url": "https://7um8a8d783.execute-api.us-east-1.amazonaws.com/prod"
+      "url": "https://REPLACE_WITH_API_ID.execute-api.us-east-1.amazonaws.com/prod"
     }
   ],
   "components": {
@@ -16,10 +16,9 @@
         "type": "oauth2",
         "flows": {
           "clientCredentials": {
-            "tokenUrl": "https://legal-contract-qs.auth.us-east-1.amazoncognito.com/oauth2/token",
+            "tokenUrl": "https://REPLACE_WITH_COGNITO_DOMAIN.auth.us-east-1.amazoncognito.com/oauth2/token",
             "scopes": {
-              "legal-contract-resource-server/read": "Read access to legal contract resources",
-              "legal-contract-resource-server/write": "Write access to legal contract resources"
+              "REPLACE_WITH_RESOURCE_SERVER/analyze": "Analyze legal contracts"
             }
           }
         }
@@ -29,21 +28,20 @@
   "security": [
     {
       "oauth2": [
-        "legal-contract-resource-server/read",
-        "legal-contract-resource-server/write"
+        "REPLACE_WITH_RESOURCE_SERVER/analyze"
       ]
     }
   ],
   "paths": {
     "/analyze": {
       "post": {
-        "summary": "Analyze legal contract",
-        "description": "Submit a legal contract for AI-powered analysis including clause extraction, risk assessment, and compliance checking",
+        "operationId": "analyzeContract",
+        "summary": "Analyze a legal contract",
+        "description": "Submit the full text of a legal contract for AI-powered analysis. Returns an executive report covering key clauses, a risk assessment with an overall risk score, regulatory compliance status, recommended actions, and an approve/review/reject recommendation. Optionally accepts a specific question to answer about the contract instead of producing a general summary.",
         "security": [
           {
             "oauth2": [
-              "legal-contract-resource-server/read",
-              "legal-contract-resource-server/write"
+              "REPLACE_WITH_RESOURCE_SERVER/analyze"
             ]
           }
         ],
@@ -53,17 +51,20 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "description": "The contract to analyze and an optional question about it.",
                 "properties": {
                   "contract_text": {
                     "type": "string",
-                    "description": "The full text of the legal contract to analyze"
+                    "description": "The full plain text of the legal contract to analyze. Required."
                   },
-                  "question": {
+                  "user_question": {
                     "type": "string",
-                    "description": "Optional specific question about the contract"
+                    "description": "Optional specific question to answer about the contract, for example 'Is our liability actually capped?'. When omitted, a full executive summary is returned instead of a targeted answer."
                   }
                 },
-                "required": ["contract_text"]
+                "required": [
+                  "contract_text"
+                ]
               }
             }
           }
@@ -75,22 +76,59 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "description": "The analysis report plus per-agent execution status.",
                   "properties": {
-                    "analysis": {
+                    "status": {
+                      "type": "string",
+                      "description": "Overall outcome of the request, either success or error."
+                    },
+                    "contract_analysis": {
                       "type": "object",
-                      "description": "Complete contract analysis results"
+                      "description": "The synthesized analysis produced by the response agent.",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "description": "Outcome reported by the response agent."
+                        },
+                        "summary_response": {
+                          "type": "string",
+                          "description": "The formatted analysis report in Markdown, covering key clauses, risks, compliance status, recommendations, and a decision recommendation."
+                        },
+                        "agent_type": {
+                          "type": "string",
+                          "description": "Identifier of the agent that produced the report."
+                        },
+                        "includes_user_question": {
+                          "type": "boolean",
+                          "description": "True when the report answers a specific supplied question rather than providing a general summary."
+                        }
+                      }
                     },
-                    "clauses": {
-                      "type": "array",
-                      "description": "Extracted contract clauses"
-                    },
-                    "risks": {
-                      "type": "array",
-                      "description": "Identified risks and concerns"
-                    },
-                    "compliance": {
+                    "agent_results": {
                       "type": "object",
-                      "description": "Compliance assessment results"
+                      "description": "Per-agent execution status, useful for confirming that all four agents ran rather than the request degrading to a partial answer.",
+                      "properties": {
+                        "clause_agent": {
+                          "type": "string",
+                          "description": "Status of the clause extraction agent."
+                        },
+                        "risk_agent": {
+                          "type": "string",
+                          "description": "Status of the risk assessment agent."
+                        },
+                        "compliance_agent": {
+                          "type": "string",
+                          "description": "Status of the compliance checking agent."
+                        },
+                        "response_agent": {
+                          "type": "string",
+                          "description": "Status of the response synthesis agent."
+                        }
+                      }
+                    },
+                    "agent_runtime": {
+                      "type": "string",
+                      "description": "ARN of the response agent runtime that produced the report."
                     }
                   }
                 }
@@ -98,16 +136,16 @@
             }
           },
           "400": {
-            "description": "Invalid input - missing or malformed request"
+            "description": "Invalid input, typically a missing contract_text field"
           },
           "401": {
-            "description": "Unauthorized - invalid or missing OAuth token"
+            "description": "Unauthorized, invalid or missing OAuth token"
           },
           "403": {
-            "description": "Forbidden - insufficient OAuth scopes"
+            "description": "Forbidden, insufficient OAuth scopes"
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal server error while invoking the agent runtimes"
           }
         }
       }

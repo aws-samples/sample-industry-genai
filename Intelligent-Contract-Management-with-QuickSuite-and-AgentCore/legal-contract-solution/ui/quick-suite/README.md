@@ -18,7 +18,7 @@ python deployment/deploy_quicksuite_integration.py
 ```
 
 This creates:
-- Lambda function (`agentcore_invoke_lambda.py`)
+- Lambda function (`deployment/quicksuite_lambda.py`)
 - API Gateway endpoint with OpenAPI schema
 - Cognito User Pool for OAuth authentication
 - All necessary IAM roles and policies

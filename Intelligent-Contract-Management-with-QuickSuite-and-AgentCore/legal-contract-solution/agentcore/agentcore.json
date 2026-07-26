@@ -1,0 +1,77 @@
+{
+  "name": "LegalContractAnalyzer",
+  "version": 1,
+  "tags": {
+    "agentcore:created-by": "agentcore-cli",
+    "agentcore:project-name": "LegalContractAnalyzer",
+    "Project": "legal-contract-solution"
+  },
+  "runtimes": [
+    {
+      "name": "legal_clause_agent",
+      "build": "Container",
+      "entrypoint": "main.py",
+      "codeLocation": "app/legal_clause_agent/",
+      "runtimeVersion": "PYTHON_3_12",
+      "networkMode": "PUBLIC",
+      "protocol": "HTTP",
+      "envVars": [
+        { "name": "BEDROCK_MODEL_ID", "value": "us.anthropic.claude-haiku-4-5-20251001-v1:0" }
+      ],
+      "instrumentation": {
+        "enableOtel": true
+      }
+    },
+    {
+      "name": "legal_risk_agent",
+      "build": "Container",
+      "entrypoint": "main.py",
+      "codeLocation": "app/legal_risk_agent/",
+      "runtimeVersion": "PYTHON_3_12",
+      "networkMode": "PUBLIC",
+      "protocol": "HTTP",
+      "envVars": [
+        { "name": "BEDROCK_MODEL_ID", "value": "us.anthropic.claude-haiku-4-5-20251001-v1:0" }
+      ],
+      "instrumentation": {
+        "enableOtel": true
+      }
+    },
+    {
+      "name": "compliance_agent",
+      "build": "Container",
+      "entrypoint": "main.py",
+      "codeLocation": "app/compliance_agent/",
+      "runtimeVersion": "PYTHON_3_12",
+      "networkMode": "PUBLIC",
+      "protocol": "HTTP",
+      "envVars": [
+        { "name": "BEDROCK_MODEL_ID", "value": "us.anthropic.claude-haiku-4-5-20251001-v1:0" }
+      ],
+      "instrumentation": {
+        "enableOtel": true
+      }
+    },
+    {
+      "name": "response_agent",
+      "build": "Container",
+      "entrypoint": "main.py",
+      "codeLocation": "app/response_agent/",
+      "runtimeVersion": "PYTHON_3_12",
+      "networkMode": "PUBLIC",
+      "protocol": "HTTP",
+      "envVars": [
+        { "name": "BEDROCK_MODEL_ID", "value": "us.anthropic.claude-haiku-4-5-20251001-v1:0" }
+      ],
+      "instrumentation": {
+        "enableOtel": true
+      }
+    }
+  ],
+  "memories": [],
+  "credentials": [],
+  "evaluators": [],
+  "onlineEvalConfigs": [],
+  "agentCoreGateways": [],
+  "policyEngines": []
+}
